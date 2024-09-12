@@ -1,0 +1,11 @@
+1- Password Generation 
+2- Filling in Forms and autofill
+3- Make a chrome extension 
+4- Make a linux based command line tool
+5- Make your own encryption algoritm or understand and use a strong one
+6- Perhaps mount the app on a server 
+7- Password Validator
+8- Use a database for storage
+9- Ability to use physical keys and biometrics
+10- Use mult-ifactor authenticaion
+11- Zero-Knowledge Architecture
