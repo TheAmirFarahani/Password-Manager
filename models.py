@@ -18,17 +18,30 @@ class User(Base):
 
     def set_password(self, plain_password):
         """Set password hash using bcrypt."""
-        self.password_hash = bcrypt.hashpw(plain_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        self.password_hash = bcrypt.hashpw(plain_password, bcrypt.gensalt())
 
     def check_password(self, plain_password):
         """Check if the provided password matches the hash."""
         return bcrypt.checkpw(plain_password.encode('utf-8'), self.password_hash.encode('utf-8'))
+    
+
+class services(Base):
+    __tablename__= "services"
+
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    service = Column(String, nullable=False)
+    url = Column(String) #optional
+    def __init__(self, service, url):
+        self.service = service
+        self.url = url
+
 
 class StoredPassword(Base):
     __tablename__ = 'stored_passwords'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
-    service_name = Column(String, nullable=False)
+    service_id = Column(String, ForeignKey('services.id'))
     username = Column(String, nullable=False)
     email = Column(String)  # Optional field
     password = Column(Text, nullable=False)
@@ -73,9 +86,9 @@ def create_user(username, plain_password):
     session.commit()
 
 # Example usage: Create a new password entry
-def create_password(service_name, username, email, password, user_id, comments):
+def create_password(service_id, username, email, password, user_id, comments):
     new_password = StoredPassword(
-        service_name=service_name,
+        service_id=service_id,
         username=username,
         email=email,
         password=password,
@@ -87,5 +100,5 @@ def create_password(service_name, username, email, password, user_id, comments):
 
 if __name__ == "__main__":
     # Example usage
-    create_user('test_user', 'plain_password')
+    create_user('test_user2', 'plain_password')
     create_password('example_service', 'test_user', 'user@example.com', 'encrypted_password', 1, 'Security question: What is your pet\'s name? Answer: Fluffy')
