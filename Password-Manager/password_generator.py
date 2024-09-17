@@ -11,7 +11,7 @@ spcl=['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '[',
 
 n = 8
 
-def generate(n):
+def generate_password(n):
     paslis = []
     pswrd = ""
     paslis.append(secrets.choice(numb))
@@ -24,4 +24,3 @@ def generate(n):
     paswrd="".join(str(x) for x in paslis)
     return paswrd
 
-print(generate(16))

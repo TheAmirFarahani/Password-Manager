@@ -25,16 +25,14 @@ class User(Base):
         return bcrypt.checkpw(plain_password.encode('utf-8'), self.password_hash.encode('utf-8'))
     
 
-class services(Base):
+class Services(Base):
     __tablename__= "services"
 
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    service = Column(String, nullable=False)
+    service_name = Column(String, nullable=False)
     url = Column(String) #optional
-    def __init__(self, service, url):
-        self.service = service
-        self.url = url
+    
 
 
 class StoredPassword(Base):
@@ -84,8 +82,14 @@ def create_user(username, plain_password):
     new_user.set_password(plain_password)
     session.add(new_user)
     session.commit()
+def create_service(service_name, url=None):
+    new_service = Services(
+        service_name = service_name,
+        url = url
+    )
+    session.add(new_service)
+    session.commit()
 
-# Example usage: Create a new password entry
 def create_password(service_id, username, email, password, user_id, comments):
     new_password = StoredPassword(
         service_id=service_id,
@@ -100,5 +104,6 @@ def create_password(service_id, username, email, password, user_id, comments):
 
 if __name__ == "__main__":
     # Example usage
-    create_user('test_user2', 'plain_password')
-    create_password('example_service', 'test_user', 'user@example.com', 'encrypted_password', 1, 'Security question: What is your pet\'s name? Answer: Fluffy')
+    create_service('Epic Games', "https://store.epicgames.com/en-US/" )
+    create_user('test_user', 'plain_password')
+    create_password(1, 'test_user', 'user@example.com', 'encrypted_password', 1, 'Security question: What is your pet\'s name? Answer: Fluffy')
