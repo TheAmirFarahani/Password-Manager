@@ -2,7 +2,7 @@
 2- Filling in Forms and autofill
 3- Make a chrome extension 
 4- Make a linux based command line tool
-5- Make your own encryption algoritm or understand and use a strong one
+5- Make your own encryption algoritm or understand and use a strong one - #Erm perhaps I was to ambitous 
 6- Perhaps mount the app on a server 
 7- Password Validator
 8- Use a database for storage

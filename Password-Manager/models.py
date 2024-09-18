@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Text, ForeignKey, TIMESTAMP, fun
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 import bcrypt
+import os
 
 Base = declarative_base()
 
@@ -11,6 +12,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String, unique=True, nullable=False)
     password_hash = Column(Text, nullable=False)
+    salt = Column(String, nullable=False)  # Store encryption key salt as a string
 
     passwords = relationship("StoredPassword", back_populates="user")
 
@@ -27,9 +29,9 @@ class User(Base):
 
 class Services(Base):
     __tablename__= "services"
-
+    user_id = Column(Integer, ForeignKey('users.id'))
     id = Column(Integer, primary_key=True, autoincrement=True)
-    service_name = Column(String, nullable=False)
+    service_name = Column(String, nullable=False) 
     url = Column(String) # optional
 
 class StoredPassword(Base):
