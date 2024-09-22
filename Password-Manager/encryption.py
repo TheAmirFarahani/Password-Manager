@@ -12,6 +12,7 @@ class EncryptionManager:
     def generate_salt() -> bytes:
         """Generate a random 16-byte salt."""
         return os.urandom(16)
+
     @staticmethod
     def derive_key(password: str, salt: bytes) -> bytes:
         """Derive a key from the master password and salt using Argon2."""
@@ -24,9 +25,10 @@ class EncryptionManager:
             hash_len=EncryptionManager.key_length,
             type=Type.I           # Argon2i variant for password hashing
         )
+
     @staticmethod
-    def encrypt(key: bytes, plaintext: str) -> dict:
-        """Encrypts the plaintext using AES-GCM."""
+    def encrypt(key: bytes, plaintext: str) -> str:
+        """Encrypts the plaintext using AES-GCM and combines all components into a single string."""
         iv = os.urandom(12)  # AES-GCM standard IV size is 12 bytes
         encryptor = Cipher(
             algorithms.AES(key),
@@ -36,18 +38,21 @@ class EncryptionManager:
 
         ciphertext = encryptor.update(plaintext.encode()) + encryptor.finalize()
 
-        return {
-            'ciphertext': base64.b64encode(ciphertext).decode(),
-            'iv': base64.b64encode(iv).decode(),
-            'tag': base64.b64encode(encryptor.tag).decode()
-        }
+        # Combine IV, tag, and ciphertext into a single string
+        encrypted_data = base64.b64encode(iv + encryptor.tag + ciphertext).decode()
+        return encrypted_data
+
     @staticmethod
-    def decrypt(key: bytes, cipher: dict) -> str:
-        """Decrypts the ciphertext using AES-GCM by extracting parameters from the cipher dictionary."""
-        iv = base64.b64decode(cipher['iv'])
-        tag = base64.b64decode(cipher['tag'])
-        ciphertext = base64.b64decode(cipher['ciphertext'])
-        
+    def decrypt(key: bytes, encrypted_data: str) -> str:
+        """Decrypts the ciphertext using AES-GCM by extracting parameters from the combined string."""
+        # Decode the base64 encoded string
+        encrypted_data = base64.b64decode(encrypted_data)
+
+        # Extract IV, tag, and ciphertext
+        iv = encrypted_data[:12]
+        tag = encrypted_data[12:28]
+        ciphertext = encrypted_data[28:]
+
         decryptor = Cipher(
             algorithms.AES(key),
             modes.GCM(iv, tag),

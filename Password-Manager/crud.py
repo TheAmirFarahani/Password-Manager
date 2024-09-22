@@ -8,26 +8,42 @@ from encryption import EncryptionManager
 def get_master_password_and_salt(user_id):
     """Returns the master password and salt for the given user ID."""
     with get_session() as session:
-        master_user = session.query(User).filter(User.id == user_id).first()
-        if master_user:
-            master_password = input("Please input the master password: ")
-            if master_user.check_password(master_password):
-                return master_password, master_user.salt
-    return None, None
-        
-def check_master_password(user_id):
-    """returns the master password"""
+        password_obtained = False
+        while not password_obtained:
+            master_user = session.query(User).filter(User.id == user_id).first()
+            if master_user:
+                master_password = input("\nPlease input the master password: ")
+                if master_user.check_password(master_password):
+                    return master_password, master_user.salt
+                else:
+                    print("\nPassword is invalid")
+
+def link_user_id_to_index():
+    """Returns a map of user index to user id, for the convenice of the user"""
     with get_session() as session:
-        master_user = session.query(User).filter(User.id == user_id).first()
-        if master_user:
-            master_password = input("Please input the master password: ")
-            return master_user.check_password(master_password)
-        
-
-
-
-
-
+        all_user = session.query(User).all()
+        index_dict = {}
+        for index, user in enumerate(all_user):
+            index_dict[index+1] = user.id
+        return index_dict
+def link_service_id_to_index(user_id):
+    """Returns a map of service index to service id, for the convenice of the user"""
+    with get_session() as session:
+        all_services = session.query(Services).filter(Services.user_id == user_id)
+        index_dict = {}
+        for index, service in enumerate(all_services):
+            index_dict[index+1] = service.id
+        return index_dict
+    
+def link_password_id_to_index(user_id, service_id):
+    """Returns a map of password index to password id, for the convenice of the user"""
+    with get_session() as session:
+        all_passwords = session.query(StoredPassword).filter(StoredPassword.user_id==user_id).filter(StoredPassword.service_id==service_id)
+        index_dict = {}
+        for index, password in enumerate(all_passwords):
+            index_dict[index+1] = password.id
+        return index_dict
+    
 
 #create section
 def create_user(username, plain_password):
@@ -50,8 +66,8 @@ def create_service(user_id, service_name , url=None):
                 url= EncryptionManager.encrypt(EncryptionManager.derive_key(master_password , salt),url)) 
             session.add(new_service)
             session.commit()
-
-def create_password(service_id, username, email, password, user_id, comments):
+#create_service(1, "Facebook", r"https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2F")
+def create_password(user_id, service_id, username, email, password, comments):
     """creates new password"""
     master_password, salt = get_master_password_and_salt(user_id)
     if master_password:
@@ -67,6 +83,8 @@ def create_password(service_id, username, email, password, user_id, comments):
             session.add(new_password)
             session.commit()
 
+#create_password(1, 1 , "amiramir","amir@gmail.com", "amirpassword", "Who is you favorite musician? Jimi Hendrix" )
+#create_password(1, 2 , "amiramir2","amir2@gmail.com", "amirpassword2", "Who is you favorite musician? Jimi Hendrix  the third" )
 
 
 
@@ -81,7 +99,6 @@ def read_all_master_users():
             return all_users
         else:
             return None
-        
 def read_all_user_services(user_id):
     """Return all service objects in the services table"""
     master_password, salt = get_master_password_and_salt(user_id)
@@ -97,7 +114,7 @@ def read_all_user_services(user_id):
             return service_list
         else:
             return None
-
+###print(read_all_user_services(1))
 def read_all_user_passwords_for_service(user_id, service_id):
     master_password, salt = get_master_password_and_salt(user_id)
     if master_password:
@@ -119,7 +136,7 @@ def read_all_user_passwords_for_service(user_id, service_id):
 
 
 
-
+#print(read_all_user_passwords_for_service(1,1),read_all_user_passwords_for_service(1,2))
 
 
 

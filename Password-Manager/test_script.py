@@ -1,70 +1,73 @@
 from crud import create_user, create_service, create_password, read_all_master_users, read_all_user_services, read_all_user_passwords_for_service, update_service, update_password, update_master_user_username, update_master_password
 from db import get_session
-from encryption import EncryptionManager
+from models import User
+import random
 
 def test_crud_operations():
-    # Create a user
-    print("Creating user...")
-    create_user("test_user", "password123")
-    
-    # Retrieve all users
-    print("Reading all master users...")
-    users = read_all_master_users()
-    print("Users:", users)
+    # Create a new user
+    username = "test_user"
+    plain_password = "password123"
+    create_user(username, plain_password)
+    print("User created")
 
-    # Assume the user created above has an ID of 1 (You need to adjust based on your actual user ID)
-    user_id = 1
-    
-    # Create a service
-    print("Creating service...")
-    create_service(user_id, "test_service", "http://testservice.com")
+    # Retrieve and check if user exists
+    with get_session() as session:
+        user = session.query(User).filter(User.username == username).first()
+        if user:
+            user_id = user.id
+            print(f"User ID: {user_id}")
 
-    # Retrieve all services for the user
-    print("Reading all user services...")
-    services = read_all_user_services(user_id)
-    print("Services:", services)
+            # Create a service
+            create_service(user_id, "test_service", "http://testservice.com")
+            print("Service created")
 
-    # Create a password
-    print("Creating password...")
-    create_password(service_id=1, username="test_user", email="user@test.com", password="securepassword", user_id=user_id, comments="Test comment")
+            # Retrieve and check if service exists
+            services = read_all_user_services(user_id)
+            print(f"Services: {services}")
 
-    # Retrieve all passwords for the service
-    print("Reading all user passwords for service...")
-    passwords = read_all_user_passwords_for_service(user_id, service_id=1)
-    print("Passwords:", passwords)
-    
-    # Update a service
-    print("Updating service...")
-    update_service(user_id, service_id=1, service_name="updated_service_name", url="http://updatedservice.com")
+            # Create a password for the service
+            create_password(1, "test_username", "test_email@example.com", "test_password", user_id, "test comments")
+            print("Password created")
 
-    # Retrieve updated services
-    print("Reading updated services...")
-    updated_services = read_all_user_services(user_id)
-    print("Updated Services:", updated_services)
+            # Retrieve and check if password exists
+            passwords = read_all_user_passwords_for_service(user_id, 1)
+            print(f"Passwords: {passwords}")
 
-    # Update a password
-    print("Updating password...")
-    update_password(user_id, password_id=1, username="updated_user", password="newsecurepassword", email="updateduser@test.com", comments="Updated comment")
+            # Update service
+            update_service(user_id, 1, service_name="updated_service", url="http://updatedservice.com")
+            print("Service updated")
 
-    # Retrieve updated passwords
-    print("Reading updated passwords for service...")
-    updated_passwords = read_all_user_passwords_for_service(user_id, service_id=1)
-    print("Updated Passwords:", updated_passwords)
+            # Check updated service
+            updated_services = read_all_user_services(user_id)
+            print(f"Updated Services: {updated_services}")
 
-    # Update user username
-    print("Updating master user username...")
-    update_master_user_username(user_id, new_username="new_test_user")
+            # Update password
+            update_password(user_id, 1, username="updated_username", password="updated_password", email="updated_email@example.com", comments="updated comments")
+            print("Password updated")
 
-    # Retrieve all users after update
-    print("Reading all master users after username update...")
-    updated_users = read_all_master_users()
-    print("Updated Users:", updated_users)
+            # Check updated password
+            updated_passwords = read_all_user_passwords_for_service(user_id, 1)
+            print(f"Updated Passwords: {updated_passwords}")
 
-    # Update master password
-    print("Updating master user password...")
-    update_master_password(user_id, new_password="newpassword123")
+            # Update master user username
+            update_master_user_username(user_id, new_username="new_test_user")
+            print("Username updated")
 
-    # Test if master password update works by creating another service or password
+            # Check updated user
+            updated_user = session.query(User).filter(User.id == user_id).first()
+            print(f"Updated User: {updated_user.username}")
+
+            # Update master password
+            update_master_password(user_id, "newpassword123")
+            print("Master password updated")
+
+            # Check if master password update works
+            if user.check_password("newpassword123"):
+                print("Master password update successful")
+            else:
+                print("Master password update failed")
+        else:
+            print("User not found")
 
 if __name__ == "__main__":
     test_crud_operations()

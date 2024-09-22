@@ -19,13 +19,13 @@ class User(Base):
     def set_password(self, plain_password):
         """Hash the plain password and store it as a string."""
         # Hash the password (bcrypt returns bytes), then decode to store it as a string.
-        hashed = bcrypt.hashpw(plain_password, bcrypt.gensalt())
+        hashed = bcrypt.hashpw(plain_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         self.password_hash = hashed  # Store as a string in the database.
 
     def check_password(self, plain_password):
         """Check if the provided password matches the hash."""
         # Encode the plain password and the stored hash before checking.
-        return bcrypt.checkpw(plain_password, self.password_hash)
+        return bcrypt.checkpw(plain_password.encode('utf-8'), self.password_hash.encode('utf-8'))
 
 class Services(Base):
     __tablename__= "services"
