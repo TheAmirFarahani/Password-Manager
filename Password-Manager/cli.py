@@ -1,7 +1,7 @@
 from crud import read_all_master_users, read_all_user_services, read_all_user_passwords_for_service
 from rich.console import Console
 from rich.table import Table
-
+import crud
 
 def print_all_master_users():
     """
@@ -58,3 +58,4 @@ def print_all_user_passwords_for_service(user_id, service_id):
         return True
     else:
         return False
+   
